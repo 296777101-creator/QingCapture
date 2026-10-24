@@ -1,0 +1,27 @@
+name: Build and test
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - name: Test core and recovery archives
+        run: bash scripts/test.sh
+      - name: Build native application
+        run: bash scripts/build.sh
+      - name: Package application
+        run: bash scripts/package.sh --skip-build
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: QingCapture-macOS
+          path: build/releases/*
+          if-no-files-found: error
